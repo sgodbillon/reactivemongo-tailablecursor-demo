@@ -46,7 +46,7 @@ trait PlayBsonImplicits {
 
   implicit object JsObjectBSONBuilder extends BSONBuilder[JsObject] {
     def write(o: JsObject, bson: Bson) = {
-      o.fields.foreach{ t:(String, JsValue) => val b = _toBson(t); println(b); bson.write(b) }
+      o.fields.foreach{ t:(String, JsValue) => val b = _toBson(t); bson.write(b) }
       bson
     }
   }
@@ -54,7 +54,7 @@ trait PlayBsonImplicits {
   implicit object JsArrayBSONBuilder extends BSONBuilder[JsArray] {
     def write(o: JsArray, bson: Bson) = {
       o.value.zipWithIndex.map{ t:(JsValue, Int) => 
-        (t._2.toString, t._1) }.foreach{ t:(String, JsValue) => val b = _toBson(t); println(b); bson.write(b)
+        (t._2.toString, t._1) }.foreach{ t:(String, JsValue) => val b = _toBson(t); bson.write(b)
       }
       bson
     }
