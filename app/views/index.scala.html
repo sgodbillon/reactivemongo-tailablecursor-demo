@@ -25,24 +25,32 @@
 				websocket.onerror = function(evt) { onError(evt) };
 			}
 			function onOpen(evt) {
-				writeToScreen("CONNECTED");
-				//doSend("WebSocket rocks");
+				/*writeToScreen("CONNECTED");*/
 			}
-			function onClose(evt) { writeToScreen("DISCONNECTED"); }
-			function onMessage(evt) { writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>'); }
+			function onClose(evt) { /*writeToScreen("DISCONNECTED");*/ }
+			function onMessage(evt) { writeToScreen('<span style="color: blue;">' + new Date() + ': ' + evt.data+'</span>'); }
 			function onError(evt) { writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data); }
 			function doSend(message) { writeToScreen("SENT: " + message);  websocket.send(message); }
-			function writeToScreen(message) { var pre = document.createElement("p"); pre.style.wordWrap = "break-word"; pre.innerHTML = message; output.appendChild(pre); }
+			function writeToScreen(message) { var pre = document.createElement("p"); pre.style.wordWrap = "break-word"; pre.innerHTML = message; output.insertBefore(pre, output.firstChild); }
 			window.addEventListener("load", init, false);
 		</script>
+		<style type="text/css">
+			label { display: block; width: 150px; }
+			input#submit { display: block; }
+			#message {float: left; }
+			#outputWrapper { float:left; margin-left: 30px; }
+		</style>
 	</head>
 	<body>
-		<h2>WebSocket Test</h2>
 		<form id="message">
-			<input id="title" name="title" type="text" placeholder="title" /><br />
-			<textarea id="content" name="content"></textarea><br />
-			<input type="submit" />
+			<h2>Create a message</h2>
+			<label for="title">Title</label><input id="title" name="title" type="text" placeholder="title" />
+			<label for="content">Content</label><textarea id="content" name="content"></textarea>
+			<input id="submit" type="submit" />
 		</form>
-		<div id="output"></div>
+		<div id="outputWrapper">
+			<h2>Capped collection</h2>
+			<div id="output"></div>
+		</div>
 	</body>
 </html>
