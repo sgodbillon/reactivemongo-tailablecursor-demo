@@ -1,3 +1,8 @@
+/*
+ * Copyright 2012 Stephane Godbillon
+ *
+ * This sample is in the public domain.
+ */
 package controllers
 
 import play.api._
@@ -16,20 +21,25 @@ import org.asyncmongo.handlers.DefaultBSONHandlers._
 import org.asyncmongo.protocol._
 
 object Application extends Controller {
-  
   def index = Action {
     Ok(views.html.index())
   }
 
-  def watchCollection = WebSocket.using[JsValue] { request => 
+  val tailableFlags = QueryFlags.TailableCursor | QueryFlags.AwaitData
+
+  def watchCollection = WebSocket.using[JsValue] { request =>
     val coll = MongoAsyncPlugin.collection("acappedcollection")
+
     // Inserts the received messages into the capped collection
     val in = Iteratee.foreach[JsValue] { json =>
       println("received " + json)
       coll.insert(json)
     }
     // Enumerates the capped collection
-    val out = Cursor.enumerate(coll.find[JsValue, JsValue, JsValue](Json.obj(), None, 0, 0, QueryFlags.TailableCursor | QueryFlags.AwaitData))
+    val out = Cursor.enumerate(
+        coll.find[JsValue, JsValue, JsValue](Json.obj(), flags = tailableFlags))
+
+    // We're done!
     (in, out)
   }
 }
