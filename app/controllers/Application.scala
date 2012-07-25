@@ -20,6 +20,9 @@ import org.asyncmongo.handlers.{BSONReaderHandler, BSONWriter, BSONReader}
 import org.asyncmongo.handlers.DefaultBSONHandlers._
 import org.asyncmongo.protocol._
 
+import akka.util.Timeout
+import akka.util.duration._
+
 object Application extends Controller {
   def index = Action {
     Ok(views.html.index())
@@ -37,7 +40,9 @@ object Application extends Controller {
     }
     // Enumerates the capped collection
     val out = Cursor.enumerate(
-        coll.find[JsValue, JsValue, JsValue](Json.obj(), flags = tailableFlags))
+      // make sure the primary has been discovered.
+      coll.connection.waitForPrimary(Timeout(1 seconds)).flatMap(_ =>
+        coll.find[JsValue, JsValue, JsValue](Json.obj(), flags = tailableFlags)))
 
     // We're done!
     (in, out)
