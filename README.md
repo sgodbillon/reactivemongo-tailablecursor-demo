@@ -33,3 +33,5 @@ When run, this sample allows to submit new documents via a WebSocket and inserts
 ```
 
 Get the complete example and run it! It uses Play 2.1 master, ReactiveMongo master and Play ReactiveMongo Plugin.
+
+> Please note that for running this example this is better to use [this snapshot of Play2](https://bitbucket.org/sgodbillon/repository/src/9f0c4e40cca1/play-2.1-SNAPSHOT.zip) since it is currently being ported to Scala 2.10.
