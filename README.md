@@ -5,6 +5,7 @@ ReactiveMongo allows to enumerate a MongoDB cursor in a non-blocking and asynchr
 This demo shows how to stream the documents that are inserted into a capped collection through a WebSocket.
 It demonstrates the following features:
 + Tailable Cursors with ReactiveMongo
++ Creating capped collections
 + Cursor Enumerators
 + Non-blocking I/O
 + Integration with Play JSON library (included in the Play ReactiveMongo Plugin)
@@ -33,5 +34,3 @@ When run, this sample allows to submit new documents via a WebSocket and inserts
 ```
 
 Get the complete example and run it! It uses Play 2.1 master, ReactiveMongo master and Play ReactiveMongo Plugin.
-
-> Please note that for running this example this is better to use [this snapshot of Play2](https://bitbucket.org/sgodbillon/repository/src/9f0c4e40cca1/play-2.1-SNAPSHOT.zip) since it is currently being ported to Scala 2.10.
