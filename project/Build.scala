@@ -8,8 +8,7 @@ object ApplicationBuild extends Build {
     val appVersion      = "1.0-SNAPSHOT"
 
     val appDependencies = Seq(
-      "reactivemongo" %% "reactivemongo" % "0.1-SNAPSHOT" cross CrossVersion.full,
-      "play.modules.reactivemongo" %% "play2-reactivemongo" % "0.1-SNAPSHOT" cross CrossVersion.full
+      "org.reactivemongo" %% "play2-reactivemongo" % "0.9-SNAPSHOT"
     )
 
     val main = play.Project(appName, appVersion, appDependencies).settings(

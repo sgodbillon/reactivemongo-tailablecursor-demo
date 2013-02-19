@@ -12,17 +12,16 @@ import play.api.libs.json._
 import play.api.libs.iteratee._
 
 import play.modules.reactivemongo._
-import play.modules.reactivemongo.PlayBsonImplicits._
+import play.modules.reactivemongo.Implicits._
 
 import reactivemongo.api._
-import reactivemongo.bson.handlers.DefaultBSONHandlers.DefaultBSONReaderHandler
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 object Application extends Controller with MongoController {
 
   // let's be sure that the collections exists and is capped
-  lazy val futureCollection :Future[Collection] = {
+  lazy val futureCollection: Future[Collection] = {
     val db = ReactiveMongoPlugin.db
     val collection = db.collection("acappedcollection")
     collection.stats().flatMap {
@@ -42,6 +41,18 @@ object Application extends Controller with MongoController {
     }
   }
 
+  def toto = Action {
+    val db = ReactiveMongoPlugin.db
+    //val collection = db.collection("acappedcollection")
+    futureCollection.map { collection =>
+      val cursor = collection.find(Json.obj(), QueryOpts().tailable.awaitData)
+      cursor.enumerate().apply(Iteratee.foreach[JsObject] { model =>
+        println(model)
+      })
+    }
+    Ok
+  }
+
   def index = Action {
     Ok(views.html.index())
   }
@@ -57,7 +68,7 @@ object Application extends Controller with MongoController {
     val out = {
       val futureEnumerator = futureCollection.map { collection =>
         // so we are sure that the collection exists and is a capped one
-        val cursor = collection.find(
+        val cursor: Cursor[JsValue] = collection.find(
           // we want all the documents
           Json.obj(),
           // the cursor must be tailable and await data
