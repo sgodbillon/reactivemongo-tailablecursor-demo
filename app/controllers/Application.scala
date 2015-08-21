@@ -24,7 +24,7 @@ class Application @Inject() (val reactiveMongoApi: ReactiveMongoApi)
     extends Controller with MongoController with ReactiveMongoComponents {
 
   // BSON-JSON conversions
-  import play.modules.reactivemongo.json._, ImplicitBSONHandlers._
+  import play.modules.reactivemongo.json._
 
   // let's be sure that the collections exists and is capped
   val futureCollection: Future[JSONCollection] = {
@@ -73,7 +73,7 @@ class Application @Inject() (val reactiveMongoApi: ReactiveMongoApi)
           .find(Json.obj())
           // the cursor must be tailable and await data
           .options(QueryOpts().tailable.awaitData)
-          .cursor[JsObject]
+          .cursor[JsObject]()
 
         // ok, let's enumerate it
         cursor.enumerate()
