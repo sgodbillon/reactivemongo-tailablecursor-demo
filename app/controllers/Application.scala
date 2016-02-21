@@ -18,31 +18,38 @@ import reactivemongo.api.{ Cursor, QueryOpts }
 import play.modules.reactivemongo.{
   MongoController, ReactiveMongoApi, ReactiveMongoComponents
 }
-import play.modules.reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json.collection.JSONCollection
 
 class Application @Inject() (val reactiveMongoApi: ReactiveMongoApi)
     extends Controller with MongoController with ReactiveMongoComponents {
 
   // BSON-JSON conversions
-  import play.modules.reactivemongo.json._, ImplicitBSONHandlers._
+  import reactivemongo.play.json._
+
+  // Iteratees cursor
+  import reactivemongo.play.iteratees.cursorProducer
 
   // let's be sure that the collections exists and is capped
   val futureCollection: Future[JSONCollection] = {
-    val db = reactiveMongoApi.db
-    val collection = db.collection[JSONCollection]("acappedcollection")
+    val db = reactiveMongoApi.database
+    val coll = db.map(_.collection[JSONCollection]("acappedcollection"))
 
-    collection.stats().flatMap {
-      case stats if !stats.capped =>
-        // the collection is not capped, so we convert it
-        println("converting to capped")
-        collection.convertToCapped(1024 * 1024, None)
-      case _ => Future(collection)
-    }.recover {
-      // the collection does not exist, so we create it
-      case _ =>
-        println("creating capped collection...")
-        collection.createCapped(1024 * 1024, None)
-    }.map { _ =>
+    for {
+      collection <- coll
+      stats <- collection.stats()
+      _ <- {
+        if (!stats.capped) {
+          // the collection is not capped, so we convert it
+          println("converting to capped")
+          collection.convertToCapped(1024 * 1024, None)
+        } else Future.successful(collection)
+      } recover {
+        // the collection does not exist, so we create it
+        case _ =>
+          println("creating capped collection...")
+          collection.createCapped(1024 * 1024, None)
+      }
+    } yield {
       println("the capped collection is available")
       collection
     }
@@ -73,15 +80,15 @@ class Application @Inject() (val reactiveMongoApi: ReactiveMongoApi)
           .find(Json.obj())
           // the cursor must be tailable and await data
           .options(QueryOpts().tailable.awaitData)
-          .cursor[JsObject]
+          .cursor[JsObject]()
 
         // ok, let's enumerate it
-        cursor.enumerate()
+        cursorProducer.produce(cursor).enumerator()
       }
       Enumerator.flatten(futureEnumerator)
     }
 
     // We're done!
-    (in, out)
+    in -> out
   }
 }
